@@ -1,0 +1,5 @@
+Туториал по tkinter:
+https://younglinux.info/tkinter.php
+
+Связь matplotlib и tkinter:
+https://pythonprogramming.net/how-to-embed-matplotlib-graph-tkinter-gui/
