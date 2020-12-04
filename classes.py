@@ -1,4 +1,4 @@
-import tkinter as tk
+from tkinter import *
 
 class Layer():
     """
@@ -8,21 +8,31 @@ number - layer number
 thickness - layer thickness
 permittivity - dielectric constant
 """
-    def __init__(self):    
+
+    def __init__(self):
         self.number = 0
-        thickness = 0
-        permittivity = 0
+        self.thickness = 0
+        self.permittivity = 0
+        self.name = ''
 
-    def get_number():
-        number = int(input())
+    def get_number(self):
+        return self.number
 
-    def get_thickness():
-        thickness = float(input())
+    def get_thickness(self):
+        return self.thickness
 
-    def get_permittivity():
-        real = float(input())
-        imagine = float(input())
-        permittivity = complex(real, imagine)
+    def get_permittivity(self):
+        return self.permittivity
+
+    def set_number(self, number):
+        self.number = number
+
+    def set_thickness(self, thickness):
+        self.thickness = thickness
+
+    def set_permittivity(self, permittivity):
+        self.permittivity = permittivity
+
 
 
 class LayerWidget():
