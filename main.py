@@ -5,6 +5,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 
+#array of the layers
 layer_objects = []
 
 
@@ -13,6 +14,11 @@ root.geometry('500x500')
 root.resizable(width = True, height = True)
 
 def input_file(input_filename):
+    '''
+    Function for reading data from a file
+    Returns an array of elements, each of which is a layer.
+    input_filename - file
+    '''
     sloi = []
     with open(input_filename) as File:
         reader = csv.reader(File, delimiter = ',')
@@ -23,10 +29,18 @@ def input_file(input_filename):
     return sloi
 
 def save_file_dialog():
+    '''
+    Function that opens the file saving window
+    '''
     out_filename = asksaveasfilename(filetypes=(("CSV Files", "*.csv"),))
     output_write(out_filename, layer_objects)
 
 def output_write(output_filename, layer_objects):
+    '''
+    Function that writes data into a file
+    output_filename - file
+    layer_objects - layer list
+    '''
     data = []
     for obj in layer_objects:
         line = [obj.number,obj.name,obj.permittivity,obj.thickness]
@@ -37,23 +51,31 @@ def output_write(output_filename, layer_objects):
 
 
 def parse_parameters(row, Layer):
+    '''
+    Parsing the parameters of the layers, which are read from the file
+    row - string of the file
+    Layer - array element
+    '''
     Layer.number = int(row[0])
     Layer.name = str(row[1])
     Layer.permittivity = complex(row[2])
     Layer.thickness = float(row[3])
 
 def open_file_dialog():
+    '''
+    Function that opens a window to read the file
+    '''
     global layer_objects
     #global perform_execution
     #perform_execution = False
     in_filename = askopenfilename(filetypes=(("CSV Files", "*.csv"),))
     layer_objects.extend(input_file(in_filename))
-    for obj in layer_objects:
-        line = '#' + str(obj.number) + '\n' + 'Name: ' + obj.name + '\n' + 'Permittivity: ' + str(
-            obj.permittivity) + '\n' + 'Thickness: ' + str(obj.thickness)
-        print(line)
+
 
 def Layer_list():
+    '''
+    Function that shows list of the layers on the screen
+    '''
     for widget in flist.winfo_children():
         widget.destroy()
 
@@ -63,12 +85,20 @@ def Layer_list():
         line = '#' + str(obj.number) + '  ' + 'Name: ' + str(obj.name) + '  ' + 'Permittivity: ' +str(obj.permittivity) + '  ' + 'Thickness: ' + str(obj.thickness)
         lbox.insert(END, line)
     lbox.pack(side=LEFT)
-    for obj in layer_objects:
-        print(obj.number)
+
+
 
 def add_layer():
+    '''
+    Function that opens a window to add a layer
+
+    '''
 
     def add_lay():
+        '''
+        Function that adds a layer
+
+        '''
         number = 0
         transport = Layer()
 
@@ -124,16 +154,20 @@ def add_layer():
     add.pack()
 
 def Builtgraph():
-    x=[]
-    y=[]
+    '''
+    Function that show graphs
+
+    '''
+    angle = np.arange(0, 90.1, 0.1)
+    f = 0
     p = plt.subplot(111)
     for i in layer_objects:
-        x.append(i.number)
-        y.append(i.thickness)
-    plt.plot(x, y)
+        f = f + i.thickness*i.permittivity.real
+    f = f/len(layer_objects)
+    plt.plot(angle, angle*f)
     plt.show()
 
-
+#Buttons
 frame = Frame(root)
 frame.pack(side=BOTTOM)
 add_layer_button = Button(frame, text="Добавить слой", command=add_layer)
@@ -143,7 +177,7 @@ addgraph.pack()
 flist = Frame(root)
 flist.pack(side=LEFT)
 
-
+#Main menu on the top of the window
 mainmenu = Menu(root)
 root.config(menu=mainmenu)
 filemenu = Menu(mainmenu, tearoff=0)
