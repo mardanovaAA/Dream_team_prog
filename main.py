@@ -78,13 +78,26 @@ def Layer_list():
     '''
     for widget in flist.winfo_children():
         widget.destroy()
-
-    lbox = tk.Listbox(flist, width = 50, height = 50)
-
+    #frames for scrollers    
+    flist_top = tk.Frame(flist)
+    flist_bot = tk.Frame(flist)
+    flist_top.pack()
+    flist_bot.pack()
+    
+    scroll_x = tk.Scrollbar(flist_top, orient = tk.HORIZONTAL)
+    scroll_y = tk.Scrollbar(flist_bot, orient = tk.VERTICAL)
+    lbox = tk.Listbox(flist_bot, xscrollcommand = scroll_x.set, yscrollcommand = scroll_y.set, 
+                      width = 50, height = 50)
+    
     for obj in layer_objects:
         line = '#' + str(obj.number) + '  ' + 'Name: ' + str(obj.name) + '  ' + 'Permittivity: ' +str(obj.permittivity) + '  ' + 'Thickness: ' + str(obj.thickness)
         lbox.insert(tk.END, line)
+       
     lbox.pack(side = tk.LEFT)
+    scroll_x.config(command = lbox.xview)
+    scroll_y.config(command = lbox.yview)
+    scroll_x.pack(fill = tk.X)
+    scroll_y.pack(side = tk.LEFT, fill = tk.Y)
 
 
 
