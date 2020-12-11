@@ -12,7 +12,7 @@ permittivity - dielectric constant
     def __init__(self):
         self.number = 0
         self.thickness = 0
-        self.permittivity = 0
+        self.refractive_index = 0
         self.name = ''
 
     def get_number(self):
@@ -22,7 +22,7 @@ permittivity - dielectric constant
         return self.thickness
 
     def get_permittivity(self):
-        return self.permittivity
+        return self.refractive_index
 
     def set_number(self, number):
         self.number = number
