@@ -10,9 +10,11 @@ class Layer():
         self.refractive_index = refractive_index
         self.name = name
 
-
+'''
 layers_list = [Layer(1, 20, 0.524 + 10.742j, 'gold')]
+'''
 
+layers_list = []
 initial_medium_refractive_index = 1.444
 final_medium_refractive_index = 1
 
@@ -112,10 +114,20 @@ def TM_transmittance():
                                       (initial_medium_refractive_index * np.cos(theta)) *
                                       abs(1 / TM_transfer_matrix(theta)[0][0]) ** 2).real)
 
-
+'''
 theta = np.arange(0, np.pi / 2, 0.01)
 plt.plot(theta, TE_reflectance()(theta))
 plt.plot(theta, TE_transmittance()(theta))
 plt.plot(theta, TM_reflectance()(theta))
 plt.plot(theta, TM_transmittance()(theta))
 plt.show()
+'''
+
+def BuiltGraph():
+    theta = np.arange(0, np.pi / 2, 0.01)
+    plt.plot(theta, TE_reflectance()(theta))
+    plt.plot(theta, TE_transmittance()(theta))
+    plt.plot(theta, TM_reflectance()(theta))
+    plt.plot(theta, TM_transmittance()(theta))
+    plt.show()
+
