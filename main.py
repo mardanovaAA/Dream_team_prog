@@ -70,8 +70,6 @@ def open_file_dialog():
     Function that opens a window to read the file
     '''
     global layer_objects
-    # global perform_execution
-    # perform_execution = False
     in_filename = fd.askopenfilename(filetypes=(("CSV Files", "*.csv"),))
     layer_objects.clear()
     layer_objects.extend(input_file(in_filename))
@@ -94,10 +92,19 @@ def Layer_list():
     lbox = tk.Listbox(flist_bot, xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set,
                       width=50, height=50)
 
-    for obj in layer_objects:
-        line = '#' + str(obj.number) + '  ' + 'Name: ' + str(obj.name) + '  ' + 'Refractive index: ' + str(
-            obj.refractive_index) + '  ' + 'Thickness: ' + str(obj.thickness)
+    lbox.insert(tk.END, '#' + str(layer_objects[0].number) + '  ' + 'Name: ' + str(
+        layer_objects[0].name) + '  ' + 'Refractive index: ' + str(
+        layer_objects[0].refractive_index) + '  ' + 'Thickness: ' + str('infinity'))
+
+    for i in range(1, len(layer_objects) - 1):
+        line = '#' + str(layer_objects[i].number) + '  ' + 'Name: ' + str(
+            layer_objects[i].name) + '  ' + 'Refractive index: ' + str(
+            layer_objects[i].refractive_index) + '  ' + 'Thickness: ' + str(layer_objects[i].thickness)
         lbox.insert(tk.END, line)
+
+    lbox.insert(tk.END, '#' + str(layer_objects[-1].number) + '  ' + 'Name: ' + str(
+        layer_objects[-1].name) + '  ' + 'Refractive index: ' + str(
+        layer_objects[-1].refractive_index) + '  ' + 'Thickness: ' + str('infinity'))
 
     lbox.pack(side=tk.LEFT)
     scroll_x.config(command=lbox.xview)
@@ -122,13 +129,13 @@ def add_layer():
 
         newlayer = cl.Layer()
 
-        newlayer.number = int(tnumber.get())
+        newlayer.number = int(t_number.get())
 
-        newlayer.name = str(tname.get())
+        newlayer.name = str(t_name.get())
 
-        newlayer.permittivity = complex(tpermittivity.get())
+        newlayer.refractive_index = complex(t_refractive_index.get())
 
-        newlayer.thickness = float(tthickness.get())
+        newlayer.thickness = float(t_thickness.get())
         '''Imp'''
         layer_objects.append(newlayer)
         for i in range(len(layer_objects) - 1):
@@ -137,38 +144,38 @@ def add_layer():
                     transport = layer_objects[j]
                     layer_objects[j] = layer_objects[j + 1]
                     layer_objects[j + 1] = transport
-        for i in range(int(tnumber.get()), len(layer_objects) - 1):
+        for i in range(int(t_number.get()), len(layer_objects) - 1):
             layer_objects[i].number += 1
         layer_objects[-1].number += 1
         addlayerwindow.destroy()
         for i in range(len(layer_objects)):
             layer_objects[i].number = i + 1
 
-    tnumber = tk.StringVar()
-    tname = tk.StringVar()
-    tthickness = tk.StringVar()
-    tpermittivity = tk.StringVar()
+    t_number = tk.StringVar()
+    t_name = tk.StringVar()
+    t_thickness = tk.StringVar()
+    t_refractive_index = tk.StringVar()
 
     addlayerwindow = tk.Toplevel(root)
 
     lnumber = tk.Label(addlayerwindow, text='Номер слоя')
     lnumber.pack()
-    enumber = tk.Entry(addlayerwindow, width=50, textvariable=tnumber)
+    enumber = tk.Entry(addlayerwindow, width=50, textvariable=t_number)
     enumber.pack()
 
     lname = tk.Label(addlayerwindow, text='Имя слоя')
     lname.pack()
-    ename = tk.Entry(addlayerwindow, width=50, textvariable=tname)
+    ename = tk.Entry(addlayerwindow, width=50, textvariable=t_name)
     ename.pack()
 
     lpermittivity = tk.Label(addlayerwindow, text='Проницаемость')
     lpermittivity.pack()
-    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=tpermittivity)
+    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=t_refractive_index)
     epermittivity.pack()
 
     lthickness = tk.Label(addlayerwindow, text='Толщина')
     lthickness.pack()
-    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=tthickness)
+    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=t_thickness)
     ethickness.pack()
 
     add = tk.Button(addlayerwindow, text='Добавить слой', command=add_lay)
@@ -183,7 +190,7 @@ def change_layer():
     number_x = int(obj[0][1:])
     name_x = str(obj[2])
     thickness_x = int(obj[7])
-    permittivity_x = complex(obj[5])
+    refractive_index_x = complex(obj[5])
 
     def change_lay():
         '''
@@ -193,15 +200,15 @@ def change_layer():
 
         oldnumber = number_x
         changed = layer_objects[number_x - 1]
-        number_x = int(tnumber.get())
-        name_x = str(tname.get())
-        thickness_x = complex(tpermittivity.get())
-        permittivity_x = float(tthickness.get())
+        number_x = int(t_number.get())
+        name_x = str(t_name.get())
+        thickness_x = complex(tthickness.get())
+        refractive_index_x = float(t_refractive_index.get())
         '''Imp'''
         changed.number = number_x
         changed.name = name_x
         changed.thickness = thickness_x
-        changed.refractive_index = permittivity_x
+        changed.refractive_index = refractive_index_x
         layer_objects[oldnumber - 1] = changed
         for i in range(len(layer_objects) - 1):
             for j in range((len(layer_objects) - i - 1)):
@@ -209,7 +216,7 @@ def change_layer():
                     transport = layer_objects[j]
                     layer_objects[j] = layer_objects[j + 1]
                     layer_objects[j + 1] = transport
-        for i in range(int(tnumber.get()), len(layer_objects) - 1):
+        for i in range(int(t_number.get()), len(layer_objects) - 1):
             layer_objects[i].number += 1
         layer_objects[-1].number += 1
         addlayerwindow.destroy()
@@ -217,31 +224,31 @@ def change_layer():
             layer_objects[i].number = i + 1
 
     changelayerwindow = tk.Toplevel(root)
-    tnumber = tk.StringVar()
-    tname = tk.StringVar()
-    tthickness = tk.StringVar()
-    tpermittivity = tk.StringVar()
+    t_number = tk.StringVar()
+    t_name = tk.StringVar()
+    t_thickness = tk.StringVar()
+    t_refractive_index = tk.StringVar()
 
     addlayerwindow = tk.Toplevel(root)
 
     lnumber = tk.Label(addlayerwindow, text='Номер слоя')
     lnumber.pack()
-    enumber = tk.Entry(addlayerwindow, width=50, textvariable=tnumber)
+    enumber = tk.Entry(addlayerwindow, width=50, textvariable=t_number)
     enumber.pack()
 
     lname = tk.Label(addlayerwindow, text='Имя слоя')
     lname.pack()
-    ename = tk.Entry(addlayerwindow, width=50, textvariable=tname)
+    ename = tk.Entry(addlayerwindow, width=50, textvariable=t_name)
     ename.pack()
 
     lpermittivity = tk.Label(addlayerwindow, text='Проницаемость')
     lpermittivity.pack()
-    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=tpermittivity)
+    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=t_permittivity)
     epermittivity.pack()
 
     lthickness = tk.Label(addlayerwindow, text='Толщина')
     lthickness.pack()
-    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=tthickness)
+    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=t_thickness)
     ethickness.pack()
 
     add = tk.Button(addlayerwindow, text='Добавить слой', command=change_lay)
@@ -303,6 +310,6 @@ mainmenu.add_cascade(label="Файл", menu=filemenu)
 mainmenu.add_command(label="Показать список слоёв", command=Layer_list)
 mainmenu.add_command(label="Справка", command=info)
 
-# testmenu=Mainmenu(root)
+
 
 tk.mainloop()
