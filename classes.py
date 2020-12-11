@@ -5,7 +5,7 @@ class Layer():
     """
     Layer of a material.
     """
-    def __init__(self, number, name, refractive_index, thickness):
+    def __init__(self):
         """
 
         @param int number: number of the layer
@@ -13,10 +13,10 @@ class Layer():
         @param complex refractive_index: refractive index of the layer material
         @param float thickness: thickness of the layer
         """
-        self.number = number
-        self.name = name
-        self.refractive_index = refractive_index
-        self.thickness = thickness
+        self.number = 0
+        self.name = ''
+        self.refractive_index = 1
+        self.thickness = 0
 
 
 class LayerWidget():
