@@ -1,6 +1,6 @@
 # Simulation program for the analysis of multilayer media
 
-The main goal of this program is computation of reflectance, transmittance and attenuation coefficient
+The main goal of this program is computation of reflectance, transmittance and absorption coefficient
 of multilayer media depending on materials characteristics (absolute permittivity and thicknesses of layers),
 wavelength of light in vacuum and angle of incidence of light.
 
