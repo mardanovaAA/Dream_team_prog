@@ -226,6 +226,18 @@ def delete_layer(number: int):
 def change_medium():
     pass
 
+def plot_graph():
+    new_calc = calc.Calculations(layers_list, initial_medium_refractive_index, final_medium_refractive_index,
+                                 vacuum_wavelength)
+    theta = np.arange(0, np.pi / 2, 0.001)
+    '''plt.plot(theta, new_calc.TE_reflectance()(theta))
+    plt.plot(theta, new_calc.TE_transmittance()(theta))
+    plt.plot(theta, new_calc.TM_reflectance()(theta))
+    plt.plot(theta, new_calc.TM_transmittance()(theta))'''
+    plt.plot(theta, new_calc.TE_extinction_coefficient()(theta))
+    plt.plot(theta, new_calc.TM_extinction_coefficient()(theta))
+    plt.show()
+
 
 def plot_graph():
     pass
@@ -303,7 +315,29 @@ def info():
 
 
 def layer_widgets():
-    pass
+    global scrollable_frame
+
+    for widget in scrollable_frame.winfo_children():
+        widget.destroy()
+
+    label_initial_medium = tk.Label(scrollable_frame,
+                                    text='Initial medium: ' + initial_medium_name + '\n Refractive index: {}'.format(
+                                        initial_medium_refractive_index),
+                                    font='Arial 10', bg='light blue', width=55, borderwidth=1, relief='solid')
+    label_initial_medium.pack(side=tk.TOP)
+
+    for layer in layers_list:
+        label_layer = tk.Label(scrollable_frame, text='Layer №{}'.format(layer.number) + ': ' + layer.name +
+                                                      '\n Refractive index: {}'.format(
+                                                          layer.refractive_index) + '\n Thickness: {}'.format(
+            layer.thickness), font='Arial 10', width=55, borderwidth=1, relief='solid')
+        label_layer.pack(side=tk.TOP)
+
+    label_final_medium = tk.Label(scrollable_frame,
+                                  text='Final medium: ' + final_medium_name + '\n Refractive index: {}'.format(
+                                      final_medium_refractive_index),
+                                  font='Arial 10', bg='white', width=55, borderwidth=1, relief='solid')
+    label_final_medium.pack(side=tk.TOP)
 
 
 root = tk.Tk()
@@ -334,6 +368,18 @@ file_menu.add_command(label="Open...", command=open_file_dialog)
 file_menu.add_command(label="Save as...", command=save_file_dialog)
 main_menu.add_cascade(label="File", menu=file_menu)
 main_menu.add_command(label="Help", command=info)
+
+main_frame = tk.Frame(root)
+canvas = tk.Canvas(main_frame)
+scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
+
+scrollable_frame = tk.Frame(canvas)
+scrollable_frame.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
+canvas.create_window((0, 0), window=scrollable_frame, anchor=tk.NW)
+
+main_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
 layer_widgets()
 
