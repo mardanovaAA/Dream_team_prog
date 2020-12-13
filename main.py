@@ -23,6 +23,10 @@ final_medium_name = 'air'
 # wavelength of light in vacuum
 vacuum_wavelength = 550
 
+# number of points for graph
+number_of_points = 1000
+
+# sizes of the main frame
 FRAME_WIDTH = 500
 FRAME_HEIGHT = 500
 
@@ -41,6 +45,24 @@ def change_wavelength():
         return
 
     vacuum_wavelength = new_wavelength
+    root.focus_set()
+
+def change_number_of_points():
+    global number_of_points
+
+    new_number_of_points = number_of_points_entry.get()
+
+    try:
+        new_number_of_points = int(new_number_of_points)
+    except:
+        mb.showerror(title='Error',
+                     message='Number of points for graph should be an integer number.')
+        number_of_points_entry.delete(0, tk.END)
+        number_of_points_entry.insert(0, number_of_points)
+        return
+
+    number_of_points = new_number_of_points
+    root.focus_set()
 
 
 
@@ -332,7 +354,7 @@ def plot_graph(TE_var1, TE_var2, TE_var3, TM_var1, TM_var2, TM_var3):
 
     new_calc = calc.Calculations(layers_list, initial_medium_refractive_index, final_medium_refractive_index,
                                  vacuum_wavelength)
-    theta = np.linspace(0, np.pi / 2, 3000)
+    theta = np.linspace(0, np.pi / 2, number_of_points)
     figure = go.Figure()
     if TE_var1: figure.add_trace(go.Scatter(x=theta, y=new_calc.TE_reflectance()(theta), name="TE reflectance"))
     if TE_var2: figure.add_trace(go.Scatter(x=theta, y=new_calc.TE_transmittance()(theta), name="TE transmittance"))
@@ -572,6 +594,18 @@ wavelength_entry.insert(0, vacuum_wavelength)
 wavelength_entry.pack(side=tk.LEFT)
 wavelength_button = tk.Button(wavelength_frame, text="OK", command=change_wavelength)
 wavelength_button.pack(side=tk.LEFT)
+
+
+# Entry for number of points
+number_of_points_frame = tk.Frame(root)
+number_of_points_frame.pack(side=tk.TOP)
+number_of_points_label = tk.Label(number_of_points_frame, text="Wavelength of light in vacuum: ", width=30)
+number_of_points_label.pack(side=tk.LEFT)
+number_of_points_entry = tk.Entry(number_of_points_frame)
+number_of_points_entry.insert(0, number_of_points)
+number_of_points_entry.pack(side=tk.LEFT)
+number_of_points_button = tk.Button(number_of_points_frame, text="OK", command=change_number_of_points)
+number_of_points_button.pack(side=tk.LEFT)
 
 # Main menu on the top of the window
 main_menu = tk.Menu(root)
