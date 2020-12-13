@@ -1,315 +1,340 @@
 import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox as mb
 from tkinter import filedialog as fd
-import classes as cl
 import csv
-import numpy as np
 import matplotlib.pyplot as plt
-import calculations as cal
+import numpy as np
+
+import classes as cl
+import calculations as calc
 
 # array of the layers
-layer_objects = []
+layers_list = []
 
-root = tk.Tk()
-root.geometry('1000x500')
-root.resizable(width=True, height=True)
+# initial medium
+initial_medium_refractive_index = 1
+initial_medium_name = 'air'
+# final medium
+final_medium_refractive_index = 1
+final_medium_name = 'air'
 
+# wavelength of light in vacuum
+vacuum_wavelength = 550
 
-def input_file(input_filename):
-    '''
-    Function for reading data from a file
-    Returns an array of elements, each of which is a layer.
-    input_filename - file
-    '''
-    sloi = []
-    with open(input_filename) as File:
-        reader = csv.reader(File, delimiter=',')
-        for row in reader:
-            sloy = cl.Layer()
-            parse_parameters(row, sloy)
-            sloi.append(sloy)
-    return sloi
-
-
-def save_file_dialog():
-    '''
-    Function that opens the file saving window
-    '''
-    out_filename = fd.asksaveasfilename(filetypes=(("CSV Files", "*.csv"),))
-    output_write(out_filename, layer_objects)
-
-
-def output_write(output_filename, layer_objects):
-    '''
-    Function that writes data into a file
-    output_filename - file
-    layer_objects - layer list
-    '''
-    data = []
-    for obj in layer_objects:
-        line = [obj.number, obj.name, obj.refractive_index, obj.thickness]
-        data.append(line)
-    with open(output_filename, 'w', newline='') as File:
-        writer = csv.writer(File)
-        writer.writerows(data)
-
-
-def parse_parameters(row, Layer):
-    '''
-    Parsing the parameters of the layers, which are read from the file
-    row - string of the file
-    Layer - array element
-    '''
-    Layer.number = int(row[0])
-    Layer.name = str(row[1])
-    Layer.refractive_index = complex(row[2])
-    Layer.thickness = float(row[3])
-
-
-def open_file_dialog():
-    '''
-    Function that opens a window to read the file
-    '''
-    global layer_objects
-    in_filename = fd.askopenfilename(filetypes=(("CSV Files", "*.csv"),))
-    layer_objects.clear()
-    layer_objects.extend(input_file(in_filename))
-
-
-def Layer_list():
-    '''
-    Function that shows list of the layers on the screen
-    '''
-    for widget in flist.winfo_children():
-        widget.destroy()
-    # frames for scrollers
-    flist_top = tk.Frame(flist)
-    flist_bot = tk.Frame(flist)
-    flist_top.pack()
-    flist_bot.pack()
-
-    scroll_x = tk.Scrollbar(flist_top, orient=tk.HORIZONTAL)
-    scroll_y = tk.Scrollbar(flist_bot, orient=tk.VERTICAL)
-    lbox = tk.Listbox(flist_bot, xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set,
-                      width=50, height=50)
-
-    lbox.insert(tk.END, '#' + str(layer_objects[0].number) + '  ' + 'Name: ' + str(
-        layer_objects[0].name) + '  ' + 'Refractive index: ' + str(
-        layer_objects[0].refractive_index) + '  ' + 'Thickness: ' + str('infinity'))
-
-    for i in range(1, len(layer_objects) - 1):
-        line = '#' + str(layer_objects[i].number) + '  ' + 'Name: ' + str(
-            layer_objects[i].name) + '  ' + 'Refractive index: ' + str(
-            layer_objects[i].refractive_index) + '  ' + 'Thickness: ' + str(layer_objects[i].thickness)
-        lbox.insert(tk.END, line)
-
-    lbox.insert(tk.END, '#' + str(layer_objects[-1].number) + '  ' + 'Name: ' + str(
-        layer_objects[-1].name) + '  ' + 'Refractive index: ' + str(
-        layer_objects[-1].refractive_index) + '  ' + 'Thickness: ' + str('infinity'))
-
-    lbox.pack(side=tk.LEFT)
-    scroll_x.config(command=lbox.xview)
-    scroll_y.config(command=lbox.yview)
-    scroll_x.pack(fill=tk.X)
-    scroll_y.pack(side=tk.LEFT, fill=tk.Y)
+FRAME_WIDTH = 500
+FRAME_HEIGHT = 500
 
 
 def add_layer():
-    '''
-    Function that opens a window to add a layer
+    global layers_list
 
-    '''
+    def ok_button_result(new_number, new_name: str, new_refractive_index: complex, new_thickness: float):
+        global layers_list
 
-    def add_lay():
-        '''
-        Function that adds a layer
+        try:
+            new_number = int(new_number)
+        except:
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 0 (initial medium) to N (number of layers).')
+            return
 
-        '''
-        number = 0
-        transport = cl.Layer()
+        if new_number < 0 or new_number > len(layers_list):
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 0 (initial medium) to N (number of layers).')
+            return
 
-        newlayer = cl.Layer()
+        try:
+            new_refractive_index = complex(new_refractive_index)
+        except:
+            mb.showerror(title='Error', message='Complex number should be inserted (without spaces).')
+            return
 
-        newlayer.number = int(t_number.get())
+        try:
+            new_thickness = float(new_thickness)
+        except:
+            mb.showerror(title='Error', message='Real number should be inserted (without spaces).')
+            return
 
-        newlayer.name = str(t_name.get())
+        layers_list.insert(new_number, cl.Layer(new_number, new_name, new_refractive_index, new_thickness))
+        for i in range(new_number, len(layers_list)):
+            layers_list[i].number = layers_list[i].number + 1
 
-        newlayer.refractive_index = complex(t_refractive_index.get())
+        layer_widgets()
+        adding_window.destroy()
 
-        newlayer.thickness = float(t_thickness.get())
-        '''Imp'''
-        layer_objects.append(newlayer)
-        for i in range(len(layer_objects) - 1):
-            for j in range((len(layer_objects) - i - 1)):
-                if layer_objects[j].number >= layer_objects[j + 1].number:
-                    transport = layer_objects[j]
-                    layer_objects[j] = layer_objects[j + 1]
-                    layer_objects[j + 1] = transport
-        for i in range(int(t_number.get()), len(layer_objects) - 1):
-            layer_objects[i].number += 1
-        layer_objects[-1].number += 1
-        addlayerwindow.destroy()
-        for i in range(len(layer_objects)):
-            layer_objects[i].number = i + 1
+    adding_window = tk.Toplevel(root)
+    adding_window.geometry("+%d+%d" % (root.winfo_x() - FRAME_WIDTH // 2, root.winfo_y() + FRAME_HEIGHT // 2))
+    adding_window.title('Add new layer')
+    adding_window.iconbitmap('icon.ico')
 
-    t_number = tk.StringVar()
-    t_name = tk.StringVar()
-    t_thickness = tk.StringVar()
-    t_refractive_index = tk.StringVar()
+    number_label = tk.Label(adding_window,
+                            text='Number of the layer below which \n new layer will be added (0 = initial medium): ')
+    number_combbox = ttk.Combobox(adding_window,
+                                  values=list(range(0, len(layers_list) + 1)))
+    number_combbox.current(len(layers_list))
+    number_label.grid(row=0, column=0)
+    number_combbox.grid(row=0, column=1)
 
-    addlayerwindow = tk.Toplevel(root)
+    name_label = tk.Label(adding_window, text='Name of the additional layer: ')
+    name_entry = tk.Entry(adding_window)
+    name_entry.insert(0, 'air')
+    name_label.grid(row=1, column=0)
+    name_entry.grid(row=1, column=1)
 
-    lnumber = tk.Label(addlayerwindow, text='Номер слоя')
-    lnumber.pack()
-    enumber = tk.Entry(addlayerwindow, width=50, textvariable=t_number)
-    enumber.pack()
+    refractive_index_label = tk.Label(adding_window, text='Refractive index of the additional layer: ')
+    refractive_index_entry = tk.Entry(adding_window)
+    refractive_index_entry.insert(0, 1)
+    refractive_index_label.grid(row=2, column=0)
+    refractive_index_entry.grid(row=2, column=1)
 
-    lname = tk.Label(addlayerwindow, text='Имя слоя')
-    lname.pack()
-    ename = tk.Entry(addlayerwindow, width=50, textvariable=t_name)
-    ename.pack()
+    thickness_label = tk.Label(adding_window, text='Thickness of the additional layer: ')
+    thickness_entry = tk.Entry(adding_window)
+    thickness_entry.insert(0, 1000)
+    thickness_label.grid(row=3, column=0)
+    thickness_entry.grid(row=3, column=1)
 
-    lpermittivity = tk.Label(addlayerwindow, text='Проницаемость')
-    lpermittivity.pack()
-    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=t_refractive_index)
-    epermittivity.pack()
-
-    lthickness = tk.Label(addlayerwindow, text='Толщина')
-    lthickness.pack()
-    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=t_thickness)
-    ethickness.pack()
-
-    add = tk.Button(addlayerwindow, text='Добавить слой', command=add_lay)
-    add.pack()
-
-
-def change_layer():
-    for widget in flist.winfo_children():
-        lbox = widget
-    line = str(lbox.curselection())
-    obj = line.split()
-    number_x = int(obj[0][1:])
-    name_x = str(obj[2])
-    thickness_x = int(obj[7])
-    refractive_index_x = complex(obj[5])
-
-    def change_lay():
-        '''
-        Function that change a layer
-
-        '''
-
-        oldnumber = number_x
-        changed = layer_objects[number_x - 1]
-        number_x = int(t_number.get())
-        name_x = str(t_name.get())
-        thickness_x = complex(tthickness.get())
-        refractive_index_x = float(t_refractive_index.get())
-        '''Imp'''
-        changed.number = number_x
-        changed.name = name_x
-        changed.thickness = thickness_x
-        changed.refractive_index = refractive_index_x
-        layer_objects[oldnumber - 1] = changed
-        for i in range(len(layer_objects) - 1):
-            for j in range((len(layer_objects) - i - 1)):
-                if layer_objects[j].number >= layer_objects[j + 1].number:
-                    transport = layer_objects[j]
-                    layer_objects[j] = layer_objects[j + 1]
-                    layer_objects[j + 1] = transport
-        for i in range(int(t_number.get()), len(layer_objects) - 1):
-            layer_objects[i].number += 1
-        layer_objects[-1].number += 1
-        addlayerwindow.destroy()
-        for i in range(len(layer_objects)):
-            layer_objects[i].number = i + 1
-
-    changelayerwindow = tk.Toplevel(root)
-    t_number = tk.StringVar()
-    t_name = tk.StringVar()
-    t_thickness = tk.StringVar()
-    t_refractive_index = tk.StringVar()
-
-    addlayerwindow = tk.Toplevel(root)
-
-    lnumber = tk.Label(addlayerwindow, text='Номер слоя')
-    lnumber.pack()
-    enumber = tk.Entry(addlayerwindow, width=50, textvariable=t_number)
-    enumber.pack()
-
-    lname = tk.Label(addlayerwindow, text='Имя слоя')
-    lname.pack()
-    ename = tk.Entry(addlayerwindow, width=50, textvariable=t_name)
-    ename.pack()
-
-    lpermittivity = tk.Label(addlayerwindow, text='Проницаемость')
-    lpermittivity.pack()
-    epermittivity = tk.Entry(addlayerwindow, width=50, textvariable=t_permittivity)
-    epermittivity.pack()
-
-    lthickness = tk.Label(addlayerwindow, text='Толщина')
-    lthickness.pack()
-    ethickness = tk.Entry(addlayerwindow, width=50, textvariable=t_thickness)
-    ethickness.pack()
-
-    add = tk.Button(addlayerwindow, text='Добавить слой', command=change_lay)
-    add.pack()
+    ok_button = tk.Button(adding_window, text='OK',
+                          command=lambda: ok_button_result(number_combbox.get(), name_entry.get(),
+                                                           refractive_index_entry.get(),
+                                                           thickness_entry.get()))
+    ok_button.grid(row=4, column=0, columnspan=2)
 
 
-def Builtgraph():
-    '''
-    Function that show graphs
+def change_layer(selected_layer: cl.Layer):
+    global layers_list
 
-    '''
-    cal.layers_list = layer_objects
-    cal.BuiltGraph()
+    if len(layers_list) == 0:
+        mb.showerror(title='Error', message='You have no layers. Firstly add one layer.')
+        return
+
+    def ok_button_result(new_number, new_name: str, new_refractive_index: complex, new_thickness: float):
+        global layers_list
+
+        try:
+            new_number = int(new_number)
+        except:
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 1 to N (number of layers).')
+            return
+
+        if new_number < 1 or new_number > len(layers_list):
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 1 to N (number of layers).')
+            return
+
+        try:
+            new_refractive_index = complex(new_refractive_index)
+        except:
+            mb.showerror(title='Error', message='Complex number should be inserted (without spaces).')
+            return
+
+        try:
+            new_thickness = float(new_thickness)
+        except:
+            mb.showerror(title='Error', message='Real number should be inserted (without spaces).')
+            return
+
+        layers_list[new_number - 1] = cl.Layer(new_number, new_name, new_refractive_index, new_thickness)
+
+        layer_widgets()
+        changing_window.destroy()
+
+    changing_window = tk.Toplevel(root)
+    changing_window.geometry("+%d+%d" % (root.winfo_x() - FRAME_WIDTH // 2, root.winfo_y() + FRAME_HEIGHT // 2))
+    changing_window.title('Change the layer')
+    changing_window.iconbitmap('icon.ico')
+
+    number_label = tk.Label(changing_window, text='Number of the changing layer: ')
+    number_combbox = ttk.Combobox(changing_window,
+                                  values=list(range(1, len(layers_list) + 1)))
+    number_combbox.current(selected_layer.number - 1)
+    number_label.grid(row=0, column=0)
+    number_combbox.grid(row=0, column=1)
+
+    name_label = tk.Label(changing_window, text='Name of the changing layer: ')
+    name_entry = tk.Entry(changing_window)
+    name_entry.insert(0, selected_layer.name)
+    name_label.grid(row=1, column=0)
+    name_entry.grid(row=1, column=1)
+
+    refractive_index_label = tk.Label(changing_window, text='Refractive index of the changing layer: ')
+    refractive_index_entry = tk.Entry(changing_window)
+    refractive_index_entry.insert(0, selected_layer.refractive_index)
+    refractive_index_label.grid(row=2, column=0)
+    refractive_index_entry.grid(row=2, column=1)
+
+    thickness_label = tk.Label(changing_window, text='Thickness of the changing layer: ')
+    thickness_entry = tk.Entry(changing_window)
+    thickness_entry.insert(0, selected_layer.thickness)
+    thickness_label.grid(row=3, column=0)
+    thickness_entry.grid(row=3, column=1)
+
+    ok_button = tk.Button(changing_window, text='OK',
+                          command=lambda: ok_button_result(number_combbox.get(), name_entry.get(),
+                                                           refractive_index_entry.get(),
+                                                           thickness_entry.get()))
+    ok_button.grid(row=4, column=0, columnspan=2)
+
+
+def delete_layer(number: int):
+    global layers_list
+
+    if len(layers_list) == 0:
+        mb.showerror(title='Error', message='You have no layers. Firstly add one layer.')
+        return
+
+    def ok_button_result(new_number):
+        global layers_list
+
+        try:
+            new_number = int(new_number)
+        except:
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 1 to N (number of layers).')
+            return
+
+        if new_number < 1 or new_number > len(layers_list):
+            mb.showerror(title='Error',
+                         message='Number of the layer should be integer in range from 1 to N (number of layers).')
+            return
+
+        layers_list.pop(new_number - 1)
+        for i in range(new_number - 1, len(layers_list)):
+            layers_list[i].number = layers_list[i].number - 1
+
+        layer_widgets()
+        deleting_window.destroy()
+
+    deleting_window = tk.Toplevel(root)
+    deleting_window.geometry("+%d+%d" % (root.winfo_x() - FRAME_WIDTH // 2, root.winfo_y() + FRAME_HEIGHT // 2))
+    deleting_window.title('Delete the layer')
+    deleting_window.iconbitmap('icon.ico')
+
+    number_label = tk.Label(deleting_window, text='Number of the deleting layer: ')
+    number_combbox = ttk.Combobox(deleting_window,
+                                  values=list(range(1, len(layers_list) + 1)))
+    number_combbox.current(number - 1)
+    number_label.grid(row=0, column=0)
+    number_combbox.grid(row=0, column=1)
+
+    ok_button = tk.Button(deleting_window, text='OK',
+                          command=lambda: ok_button_result(number_combbox.get()))
+    ok_button.grid(row=1, column=0, columnspan=2)
+
+
+def change_medium():
+    pass
+
+
+def plot_graph():
+    pass
+
+
+def read_data(input_filename: str):
+    global vacuum_wavelength
+    global initial_medium_name
+    global initial_medium_refractive_index
+    global final_medium_name
+    global final_medium_refractive_index
+    global layers_list
+
+    layers_list = []
+    with open(input_filename) as file:
+        reader = csv.reader(file, delimiter=';')
+
+        row1 = next(reader)
+        vacuum_wavelength = float(row1[0])
+        row2 = next(reader)
+        initial_medium_name = row2[0]
+        initial_medium_refractive_index = float(row2[1])
+        row3 = next(reader)
+        final_medium_name = row3[0]
+        final_medium_refractive_index = float(row3[1])
+
+        for row in reader:
+            if len(row) == 4:
+                number = int(row[0])
+                name = row[1]
+                refractive_index = complex(row[2])
+                thickness = float(row[3])
+                layers_list.append(cl.Layer(number, name, refractive_index, thickness))
+            else:
+                break
+
+        layer_widgets()
+
+
+def open_file_dialog():
+    input_filename = fd.askopenfilename(filetypes=(("CSV Files", "*.csv"),))
+    read_data(input_filename)
+
+
+def write_data(output_filename: str):
+    pass
+
+
+def save_file_dialog():
+    output_filename = fd.asksaveasfilename(filetypes=(("CSV Files", "*.csv"),))
+    write_data(output_filename)
 
 
 def info():
-    showinfowindow = tk.Toplevel(root)
-    text = '''
-    The program allows to calculate the reflection, refraction and absorption coefficients of light incident on a film consisting of several layers.
+    info_window = tk.Toplevel(root)
+    info_window.title('Help')
+    info_window.iconbitmap('icon.ico')
 
-    The program plots the dependence of these coefficients and allows to read the data from the file, edit them and write them back to the file.
+    info_text = '''
+        The program allows to calculate the reflection, refraction and absorption coefficients of light incident on a film consisting of several layers.
 
-    Buttons
+        The program plots the dependence of these coefficients and allows to read the data from the file, edit them and write them back to the file.
 
-    Файл - menu for opening and saving files
-    Добавить слой - adding a layer to the list
-    Построить график - builds the graph of coefficients dependence on the angle
+        Buttons
+
+        File - menu for opening and saving files
+        Add new layer - adding a layer to the list
+        Change a layer - changing characteristics of a layer
+        Delete a layer - deleting a layer from the list
+        Change a medium - changing characteristics of a medium
+        Plot the graph - plotting the graph of coefficients versus the angle
+        '''
+    info_label = tk.Label(info_window, text=info_text, justify=tk.LEFT)
+    info_label.pack()
 
 
-    '''
-    infolabel = tk.Label(showinfowindow, text=text, justify=tk.LEFT)
-    infolabel.pack()
+def layer_widgets():
+    pass
 
 
-def clear_list():
-    layer_objects.clear()
+root = tk.Tk()
+root.geometry(
+    '%dx%d+%d+%d' % (FRAME_WIDTH, FRAME_HEIGHT, root.winfo_screenwidth() // 3, root.winfo_screenheight() // 3))
+root.resizable(width=True, height=True)
+root.title('Simulation program for the analysis of multilayer media')
+root.iconbitmap('icon.ico')
 
-
-# Buttons
-frame = tk.Frame(root)
-frame.pack(side=tk.BOTTOM)
-add_layer_button = tk.Button(frame, text="Добавить слой", command=add_layer)
+buttons_frame = tk.Frame(root)
+buttons_frame.pack(side=tk.BOTTOM)
+add_layer_button = tk.Button(buttons_frame, text="Add new layer", command=add_layer)
 add_layer_button.pack(side=tk.LEFT)
-changelayer = tk.Button(frame, text="Изменить слой", command=change_layer)
-'''changelayer.pack(side=tk.LEFT)'''
-clearlist = tk.Button(frame, text="Очистить", command=clear_list)
-clearlist.pack(side=tk.LEFT)
-addgraph = tk.Button(frame, text='Построить график', command=Builtgraph)
-addgraph.pack(side=tk.LEFT)
-flist = tk.Frame(root)
-flist.pack(side=tk.LEFT)
-# Main menu on the top of the window
-mainmenu = tk.Menu(root)
-root.config(menu=mainmenu)
-filemenu = tk.Menu(mainmenu, tearoff=0)
-filemenu.add_command(label="Открыть...", command=open_file_dialog)
-filemenu.add_command(label="Сохранить файл как...", command=save_file_dialog)
-mainmenu.add_cascade(label="Файл", menu=filemenu)
-mainmenu.add_command(label="Показать список слоёв", command=Layer_list)
-mainmenu.add_command(label="Справка", command=info)
+change_layer_button = tk.Button(buttons_frame, text="Change a layer",
+                                command=lambda: change_layer(cl.Layer(1, 'air', 1, 0)))
+change_layer_button.pack(side=tk.LEFT)
+delete_layer_button = tk.Button(buttons_frame, text="Delete a layer", command=lambda: delete_layer(1))
+delete_layer_button.pack(side=tk.LEFT)
+change_medium_button = tk.Button(buttons_frame, text="Change a medium", command=change_medium)
+change_medium_button.pack(side=tk.LEFT)
+plot_graph_button = tk.Button(buttons_frame, text='Plot the graph', command=plot_graph)
+plot_graph_button.pack(side=tk.LEFT)
 
+main_menu = tk.Menu(root)
+root.config(menu=main_menu)
+file_menu = tk.Menu(main_menu, tearoff=0)
+file_menu.add_command(label="Open...", command=open_file_dialog)
+file_menu.add_command(label="Save as...", command=save_file_dialog)
+main_menu.add_cascade(label="File", menu=file_menu)
+main_menu.add_command(label="Help", command=info)
 
+layer_widgets()
 
-tk.mainloop()
+root.mainloop()
