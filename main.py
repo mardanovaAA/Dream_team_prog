@@ -30,7 +30,13 @@ number_of_points = 1000
 FRAME_WIDTH = 500
 FRAME_HEIGHT = 500
 
+
 def change_wavelength():
+    '''
+    Changes the wavelength of light in vacuum.
+
+    @return: None
+    '''
     global vacuum_wavelength
 
     new_wavelength = wavelength_entry.get()
@@ -47,7 +53,13 @@ def change_wavelength():
     vacuum_wavelength = new_wavelength
     root.focus_set()
 
+
 def change_number_of_points():
+    '''
+    Changes number of points for graph.
+
+    @return: None
+    '''
     global number_of_points
 
     new_number_of_points = number_of_points_entry.get()
@@ -63,7 +75,6 @@ def change_number_of_points():
 
     number_of_points = new_number_of_points
     root.focus_set()
-
 
 
 def add_layer():
@@ -595,11 +606,10 @@ wavelength_entry.pack(side=tk.LEFT)
 wavelength_button = tk.Button(wavelength_frame, text="OK", command=change_wavelength)
 wavelength_button.pack(side=tk.LEFT)
 
-
 # Entry for number of points
 number_of_points_frame = tk.Frame(root)
 number_of_points_frame.pack(side=tk.TOP)
-number_of_points_label = tk.Label(number_of_points_frame, text="Wavelength of light in vacuum: ", width=30)
+number_of_points_label = tk.Label(number_of_points_frame, text="Number of points for the graph: ", width=30)
 number_of_points_label.pack(side=tk.LEFT)
 number_of_points_entry = tk.Entry(number_of_points_frame)
 number_of_points_entry.insert(0, number_of_points)
